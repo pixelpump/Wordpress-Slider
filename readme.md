@@ -1,6 +1,6 @@
 # Simple Elegant Slider
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Author:** Daniel Doucette  
 **Description:** An elegant, simple image slider plugin with mobile swipe support for WordPress.
 
@@ -68,7 +68,7 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
 
 ## Changelog
 
-### Version 1.2
+### Version 1.3
 - Added support for multiple sliders.
 - Introduced auto-slide functionality.
 - Improved admin interface for managing sliders.
