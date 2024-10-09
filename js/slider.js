@@ -3,9 +3,11 @@
         $('.simple-elegant-slider').each(function() {
             var $slider = $(this);
             var autoSlide = $slider.data('auto-slide') === true;
+            var animationSpeed = $slider.data('animation-speed') || 500;
 
             var swiperOptions = {
                 loop: true,
+                speed: animationSpeed,
                 pagination: {
                     el: '.swiper-pagination',
                     clickable: true,

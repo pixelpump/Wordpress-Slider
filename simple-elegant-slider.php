@@ -14,6 +14,7 @@ class SimpleElegantSlider {
     public function __construct() {
         add_action('admin_menu', array($this, 'add_plugin_page'));
         add_action('admin_init', array($this, 'page_init'));
+        add_action('admin_init', array($this, 'handle_slider_deletion')); // Handle deletion here
         add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
         add_shortcode('simple_elegant_slider', array($this, 'slider_shortcode'));
@@ -76,8 +77,29 @@ class SimpleElegantSlider {
             <?php
             settings_fields('simple_elegant_slider_group');
             do_settings_sections('simple-elegant-slider');
-            submit_button('Add Slider');
             ?>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Show Captions</th>
+                    <td>
+                        <input type="checkbox" id="show_captions" name="simple_elegant_sliders[show_captions]" value="1" />
+                        <label for="show_captions">Show image captions</label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Caption Text Color</th>
+                    <td>
+                        <input type="text" id="caption_text_color" name="simple_elegant_sliders[caption_text_color]" value="#ffffff" class="color-field" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Animation Speed (ms)</th>
+                    <td>
+                        <input type="number" id="animation_speed" name="simple_elegant_sliders[animation_speed]" value="500" min="100" step="100" />
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button('Add Slider'); ?>
         </form>
         <?php
     }
@@ -113,9 +135,29 @@ class SimpleElegantSlider {
                         <label for="auto_slide">Enable automatic sliding</label>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Show Captions</th>
+                    <td>
+                        <input type="checkbox" id="show_captions" name="show_captions" value="1" <?php checked(isset($slider['show_captions']) && $slider['show_captions']); ?> />
+                        <label for="show_captions">Show image captions</label>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Caption Text Color</th>
+                    <td>
+                        <input type="text" id="caption_text_color" name="caption_text_color" value="<?php echo esc_attr($slider['caption_text_color'] ?? '#ffffff'); ?>" class="color-field" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Animation Speed (ms)</th>
+                    <td>
+                        <input type="number" id="animation_speed" name="animation_speed" value="<?php echo esc_attr($slider['animation_speed'] ?? 500); ?>" min="100" step="100" />
+                    </td>
+                </tr>
             </table>
             <?php submit_button('Update Slider'); ?>
         </form>
+        <a href="<?php echo admin_url('admin.php?page=simple-elegant-slider'); ?>" class="button">Back</a>
         <?php
     }
 
@@ -164,24 +206,36 @@ class SimpleElegantSlider {
             $name = sanitize_text_field($_POST['slider_edit_name']);
             $this->sliders[$name] = array(
                 'images' => explode(',', sanitize_text_field($_POST['slider_images'])),
-                'auto_slide' => isset($_POST['auto_slide']) ? true : false
+                'auto_slide' => isset($_POST['auto_slide']) ? true : false,
+                'show_captions' => isset($_POST['show_captions']) ? true : false,
+                'caption_text_color' => sanitize_hex_color($_POST['caption_text_color'] ?? '#ffffff'),
+                'animation_speed' => absint($_POST['animation_speed'] ?? 500)
             );
         } elseif (isset($input['slider_name']) && !empty($input['slider_name'])) {
             // Adding new slider
             $name = sanitize_text_field($input['slider_name']);
             $this->sliders[$name] = array(
                 'images' => explode(',', sanitize_text_field($input['slider_images'])),
-                'auto_slide' => isset($input['auto_slide']) ? true : false
+                'auto_slide' => isset($input['auto_slide']) ? true : false,
+                'show_captions' => isset($input['show_captions']) ? true : false,
+                'caption_text_color' => sanitize_hex_color($input['caption_text_color'] ?? '#ffffff'),
+                'animation_speed' => absint($input['animation_speed'] ?? 500)
             );
         }
 
-        // Handle slider deletion
+        return $this->sliders;
+    }
+
+    public function handle_slider_deletion() {
         if (isset($_GET['action']) && $_GET['action'] === 'delete' && isset($_GET['name'])) {
             $name = sanitize_text_field($_GET['name']);
-            unset($this->sliders[$name]);
+            if (isset($this->sliders[$name])) {
+                unset($this->sliders[$name]);
+                update_option('simple_elegant_sliders', $this->sliders);
+                wp_redirect(admin_url('admin.php?page=simple-elegant-slider'));
+                exit;
+            }
         }
-
-        return $this->sliders;
     }
 
     public function print_section_info() {
@@ -219,7 +273,9 @@ class SimpleElegantSlider {
             return;
         }
         wp_enqueue_media();
-        wp_enqueue_script('simple-elegant-slider-admin', plugin_dir_url(__FILE__) . 'js/admin.js', array('jquery'), null, true);
+        wp_enqueue_script('wp-color-picker');
+        wp_enqueue_style('wp-color-picker');
+        wp_enqueue_script('simple-elegant-slider-admin', plugin_dir_url(__FILE__) . 'js/admin.js', array('jquery', 'wp-color-picker'), null, true);
     }
 
     public function slider_shortcode($atts) {
@@ -240,11 +296,14 @@ class SimpleElegantSlider {
 
         ob_start();
         ?>
-        <div class="swiper simple-elegant-slider" data-auto-slide="<?php echo $slider['auto_slide'] ? 'true' : 'false'; ?>">
+        <div class="swiper simple-elegant-slider" data-auto-slide="<?php echo $slider['auto_slide'] ? 'true' : 'false'; ?>" data-animation-speed="<?php echo esc_attr($slider['animation_speed']); ?>">
             <div class="swiper-wrapper">
                 <?php foreach ($image_ids as $image_id): ?>
                     <div class="swiper-slide">
                         <?php echo wp_get_attachment_image($image_id, 'full'); ?>
+                        <?php if ($slider['show_captions'] && $caption = wp_get_attachment_caption($image_id)): ?>
+                            <div class="swiper-caption" style="color: <?php echo esc_attr($slider['caption_text_color']); ?>;"><?php echo esc_html($caption); ?></div>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>

@@ -26,4 +26,7 @@ jQuery(document).ready(function($) {
         });
         frame.open();
     });
+
+    // Initialize color picker
+    $('.color-field').wpColorPicker();
 });

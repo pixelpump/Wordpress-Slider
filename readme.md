@@ -39,6 +39,8 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
    - Enter a name for your slider.
    - Click "Select Images" to choose images from the WordPress Media Library.
    - Optionally, enable "Auto Slide" to allow the slider to animate automatically.
+   - Set the "Animation Speed" for slide transitions.
+   - Choose whether to "Show Captions" and set the "Caption Text Color".
    - Click "Add Slider" to save your new slider.
 
 2. **Edit an Existing Slider:**
@@ -61,6 +63,8 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
 - **Multiple Sliders:** Create and manage multiple sliders with unique names.
 - **Auto Slide Option:** Enable or disable automatic sliding for each slider.
 - **Customizable:** Easily customize the appearance with CSS.
+- **Caption Support:** Option to show captions with customizable text color.
+- **Adjustable Animation Speed:** Set the speed of slide transitions.
 
 ## Changelog
 
@@ -69,6 +73,8 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
 - Introduced auto-slide functionality.
 - Improved admin interface for managing sliders.
 - Fixed issues with slider deletion.
+- Added options for showing captions and setting caption text color.
+- Added adjustable animation speed for slide transitions.
 
 ## Support
 
