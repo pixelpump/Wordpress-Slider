@@ -72,4 +72,4 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
 
 ## Support
 
-For support, please contact the plugin author at [your-email@example.com](mailto:your-email@example.com).
+For support, please contact the plugin author at [pixelpump@gmail.com](mailto:pixelpump@gmail.com).
