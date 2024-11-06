@@ -1,6 +1,6 @@
 <?php
 /*
-Plugin Name: Simple Elegant Slider
+Plugin Name: Simple Elegant Slider w/video
 Description: An elegant, simple image slider plugin with mobile swipe support
 Version: 1.2
 Author: Daniel Doucette
@@ -115,14 +115,19 @@ class SimpleElegantSlider {
             <input type="hidden" name="slider_edit_name" value="<?php echo esc_attr($name); ?>">
             <table class="form-table">
                 <tr>
-                    <th scope="row">Slider Images</th>
+                    <th scope="row">Slider Media</th>
                     <td>
-                        <input type="hidden" id="slider_images" name="slider_images" value="<?php echo esc_attr(implode(',', $slider['images'])); ?>" />
-                        <button type="button" class="button" id="select_slider_images">Select Images</button>
-                        <div id="slider_image_preview">
+                        <input type="hidden" id="slider_media" name="slider_media" value="<?php echo esc_attr(implode(',', $slider['media'])); ?>" />
+                        <button type="button" class="button" id="select_slider_media">Select Media</button>
+                        <div id="slider_media_preview">
                             <?php
-                            foreach ($slider['images'] as $image_id) {
-                                echo wp_get_attachment_image($image_id, 'thumbnail', false, array('style' => 'max-width:100px;max-height:100px;margin-right:10px;'));
+                            foreach ($slider['media'] as $media_id) {
+                                $mime_type = get_post_mime_type($media_id);
+                                if (strpos($mime_type, 'video') !== false) {
+                                    echo '<video src="' . esc_url(wp_get_attachment_url($media_id)) . '" style="max-width:100px;max-height:100px;margin-right:10px;" controls></video>';
+                                } else {
+                                    echo wp_get_attachment_image($media_id, 'thumbnail', false, array('style' => 'max-width:100px;max-height:100px;margin-right:10px;'));
+                                }
                             }
                             ?>
                         </div>
@@ -184,9 +189,9 @@ class SimpleElegantSlider {
         );
 
         add_settings_field(
-            'slider_images',
-            'Slider Images',
-            array($this, 'slider_images_callback'),
+            'slider_media',
+            'Slider Media',
+            array($this, 'slider_media_callback'),
             'simple-elegant-slider',
             'simple_elegant_slider_section'
         );
@@ -205,7 +210,7 @@ class SimpleElegantSlider {
             // Updating existing slider
             $name = sanitize_text_field($_POST['slider_edit_name']);
             $this->sliders[$name] = array(
-                'images' => explode(',', sanitize_text_field($_POST['slider_images'])),
+                'media' => explode(',', sanitize_text_field($_POST['slider_media'])),
                 'auto_slide' => isset($_POST['auto_slide']) ? true : false,
                 'show_captions' => isset($_POST['show_captions']) ? true : false,
                 'caption_text_color' => sanitize_hex_color($_POST['caption_text_color'] ?? '#ffffff'),
@@ -215,7 +220,7 @@ class SimpleElegantSlider {
             // Adding new slider
             $name = sanitize_text_field($input['slider_name']);
             $this->sliders[$name] = array(
-                'images' => explode(',', sanitize_text_field($input['slider_images'])),
+                'media' => explode(',', sanitize_text_field($input['slider_media'])),
                 'auto_slide' => isset($input['auto_slide']) ? true : false,
                 'show_captions' => isset($input['show_captions']) ? true : false,
                 'caption_text_color' => sanitize_hex_color($input['caption_text_color'] ?? '#ffffff'),
@@ -246,11 +251,11 @@ class SimpleElegantSlider {
         echo '<input type="text" id="slider_name" name="simple_elegant_sliders[slider_name]" value="" />';
     }
 
-    public function slider_images_callback() {
+    public function slider_media_callback() {
         ?>
-        <input type="hidden" id="slider_images" name="simple_elegant_sliders[slider_images]" value="" />
-        <button type="button" class="button" id="select_slider_images">Select Images</button>
-        <div id="slider_image_preview"></div>
+        <input type="hidden" id="slider_media" name="simple_elegant_sliders[slider_media]" value="" />
+        <button type="button" class="button" id="select_slider_media">Select Media</button>
+        <div id="slider_media_preview"></div>
         <?php
     }
 
@@ -288,9 +293,9 @@ class SimpleElegantSlider {
         }
 
         $slider = $this->sliders[$atts['name']];
-        $image_ids = $slider['images'];
+        $media_ids = $slider['media'];
 
-        if (empty($image_ids)) {
+        if (empty($media_ids)) {
             return '';
         }
 
@@ -298,10 +303,17 @@ class SimpleElegantSlider {
         ?>
         <div class="swiper simple-elegant-slider" data-auto-slide="<?php echo $slider['auto_slide'] ? 'true' : 'false'; ?>" data-animation-speed="<?php echo esc_attr($slider['animation_speed']); ?>">
             <div class="swiper-wrapper">
-                <?php foreach ($image_ids as $image_id): ?>
+                <?php foreach ($media_ids as $media_id): ?>
                     <div class="swiper-slide">
-                        <?php echo wp_get_attachment_image($image_id, 'full'); ?>
-                        <?php if ($slider['show_captions'] && $caption = wp_get_attachment_caption($image_id)): ?>
+                        <?php
+                        $mime_type = get_post_mime_type($media_id);
+                        if (strpos($mime_type, 'video') !== false) {
+                            echo wp_video_shortcode(array('src' => wp_get_attachment_url($media_id)));
+                        } else {
+                            echo wp_get_attachment_image($media_id, 'full');
+                        }
+                        ?>
+                        <?php if ($slider['show_captions'] && $caption = wp_get_attachment_caption($media_id)): ?>
                             <div class="swiper-caption" style="color: <?php echo esc_attr($slider['caption_text_color']); ?>;"><?php echo esc_html($caption); ?></div>
                         <?php endif; ?>
                     </div>

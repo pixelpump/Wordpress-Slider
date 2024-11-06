@@ -25,7 +25,14 @@
                 };
             }
 
-            new Swiper($slider[0], swiperOptions);
+            var swiper = new Swiper($slider[0], swiperOptions);
+
+            // Pause autoplay when video is playing
+            $slider.find('video').on('play', function() {
+                swiper.autoplay.stop();
+            }).on('pause ended', function() {
+                swiper.autoplay.start();
+            });
         });
     });
 })(jQuery);

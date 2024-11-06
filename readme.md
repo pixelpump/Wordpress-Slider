@@ -65,6 +65,7 @@ Simple Elegant Slider is a WordPress plugin that allows you to create beautiful,
 - **Customizable:** Easily customize the appearance with CSS.
 - **Caption Support:** Option to show captions with customizable text color.
 - **Adjustable Animation Speed:** Set the speed of slide transitions.
+- **Video Support:** Add video files to your sliders.
 
 ## Changelog
 

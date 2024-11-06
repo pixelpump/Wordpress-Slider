@@ -28,6 +28,13 @@
     margin-top: 14px; /* Add margin to position the caption below the image */
 }
 
+.simple-elegant-slider .swiper-pagination {
+    position: relative;
+    text-align: center;
+    margin-top: -22px; /* Adjust margin to position pagination above the caption */
+    margin-bottom: 12px; /* Add some space below the pagination */
+}
+
 .simple-elegant-slider .swiper-button-next,
 .simple-elegant-slider .swiper-button-prev {
     color: #fff;
@@ -39,12 +46,6 @@
 .simple-elegant-slider .swiper-button-next:hover,
 .simple-elegant-slider .swiper-button-prev:hover {
     background-color: rgba(0, 0, 0, 0.8);
-}
-
-.simple-elegant-slider .swiper-pagination {
-    position: relative;
-    text-align: center;
-    margin-top: 10px; /* Add some space above the pagination */
 }
 
 .simple-elegant-slider .swiper-pagination-bullet {
